@@ -1,16 +1,137 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 🌳 Type3ree – Typing Speed Test
 
-Currently, two official plugins are available:
+Type3ree is a clean and minimal typing speed test game built with **React + Vite**.
+It focuses on improving typing accuracy and speed using a simple word-by-word system.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Designed with a **nature/forest theme** 🌿 and a tree mascot.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎮 Features
 
-## Expanding the ESLint configuration
+* ⏱ 30-second typing test
+* 📝 One-word-at-a-time typing system
+* 🟢 Green border when typing correctly
+* 🔴 Red border when typing incorrectly
+* 📊 Final WPM (Words Per Minute) result
+* 🔁 Play Again functionality
+* 🎨 Clean green nature-themed UI
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🧠 How It Works
+
+* A shuffled list of learning-related words is generated.
+* The player types one word at a time.
+* The input box:
+
+  * Turns **green** if the typed text matches the word.
+  * Turns **red** if there is a mistake.
+* When time is up:
+
+  * The input disappears.
+  * Final WPM is calculated and displayed.
+
+### WPM Formula
+
+```
+WPM = (Correct Characters / 5) / Time in Minutes
+```
+
+* 5 characters = 1 word (standard typing metric)
+* Test duration: 30 seconds
+
+---
+
+## 🛠 Tech Stack
+
+**Frontend**
+
+* React (Vite)
+* JavaScript (ES6)
+* HTML + CSS
+
+**Tools**
+
+* VS Code
+* Node.js (LTS)
+* npm
+* Git & GitHub
+
+No backend is used.
+This is a fully frontend-based project.
+
+---
+
+## 📂 Project Structure
+
+```
+typing-speed-test/
+│
+├─ src/
+│  ├─ components/
+│  │  ├─ TypingTest.jsx
+│  │  └─ Timer.jsx
+│  │
+│  ├─ data/
+│  │  └─ sentences.js
+│  │
+│  ├─ App.jsx
+│  ├─ main.jsx
+│  └─ index.css
+│
+├─ public/
+└─ package.json
+```
+
+---
+
+## 🚀 Installation & Setup
+
+1. Clone the repository
+
+```
+git clone https://github.com/your-username/type3ree.git
+```
+
+2. Navigate into project folder
+
+```
+cd type3ree
+```
+
+3. Install dependencies
+
+```
+npm install
+```
+
+4. Run development server
+
+```
+npm run dev
+```
+
+---
+
+## 📌 Future Improvements (Planned)
+
+* Save best score using LocalStorage
+* Difficulty levels (Easy / Medium / Hard)
+* Sound effects
+* Dark mode
+* Typing accuracy percentage
+* Word progress bar
+
+---
+
+## 👩‍💻 Author
+
+Created as a mini portfolio project to practice:
+
+* React state management
+* Component structure
+* Game logic
+* UI styling
+
