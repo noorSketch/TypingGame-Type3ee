@@ -104,3 +104,26 @@ button:focus-visible {
     transform: scale(1);
   }
 }
+
+
+/* Wrong first-letter flash */
+.wrong-flash {
+  animation: flashRed 0.3s ease;
+}
+
+@keyframes flashRed {
+  0% { background-color: #ffcccc; }
+  50% { background-color: #ff4d4d; }
+  100% { background-color: transparent; }
+}
+
+/* Wiggle animation */
+.wiggle {
+  animation: wiggle 0.3s ease;
+}
+
+@keyframes wiggle {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}

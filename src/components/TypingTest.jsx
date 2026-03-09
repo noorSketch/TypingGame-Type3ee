@@ -2,55 +2,85 @@ import { useState, useEffect, useRef } from "react";
 import Timer from "./Timer";
 import { wordsList } from "../data/sentences";
 
-
-// Typing test showing one word at a time
 export default function TypingTest() {
+
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [input, setInput] = useState("");
-  const [started, setStarted] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [correctCharCount, setCorrectCharCount] = useState(0);
+  const [score, setScore] = useState(0);
+
+  const [countdown, setCountdown] = useState(3);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  const [flashWrong, setFlashWrong] = useState(false);
+  const [forceRed, setForceRed] = useState(false);
+
   const inputRef = useRef(null);
 
-  // Initialize random word list (shuffle and pick e.g. 20 words)
-  useEffect(() => {
-    function shuffle(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
+  // Shuffle words
+  function shuffle(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
     }
+    return copy;
+  }
 
+  useEffect(() => {
     const shuffled = shuffle(wordsList);
-    setWords(shuffled.slice(0, 70)); // take first 70 words
+    setWords(shuffled.slice(0, 70));
   }, []);
 
-  // Auto focus input when test starts
+  // Countdown before start
   useEffect(() => {
-    if (started && inputRef.current) {
+    if (countdown <= 0) {
+      setGameStarted(true);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown(c => c - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  // Auto focus
+  useEffect(() => {
+    if (gameStarted && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [started]);
+  }, [gameStarted]);
 
-  // Handle input change
   function handleChange(e) {
-    if (timeUp) return;
+    if (!gameStarted || timeUp) return;
 
     const val = e.target.value;
-    if (!started) setStarted(true);
+    const currentWord = words[currentIndex];
+    if (!currentWord) return;
+
+    // FIRST LETTER WRONG
+    if (val.length === 1 && val !== currentWord[0]) {
+      setFlashWrong(true);
+      setForceRed(true);
+
+      setTimeout(() => {
+        setFlashWrong(false);
+        setForceRed(false);
+      }, 300);
+
+      setCurrentIndex(i => i + 1);
+      setInput("");
+      return;
+    }
+
     setInput(val);
 
-    const currentWord = words[currentIndex];
-
-    // If input matches current word exactly, go to next
-    if (val.trim() === currentWord) {
-      // count chars of the word + 1 space except last word
-      setCorrectCharCount(c =>
-        c + currentWord.length + (currentIndex === words.length - 1 ? 0 : 1)
-      );
+    // FULL WORD CORRECT
+    if (val === currentWord) {
+      setScore(s => s + 1);
       setCurrentIndex(i => i + 1);
       setInput("");
     }
@@ -60,109 +90,97 @@ export default function TypingTest() {
     setTimeUp(true);
   }
 
-  function handleRestart() {
-    setCurrentIndex(0);
-    setInput("");
-    setStarted(false);
-    setTimeUp(false);
-    setCorrectCharCount(0);
-    if (inputRef.current) inputRef.current.focus();
-  }
 
-  // Input border color: green if input matches start of current word, red otherwise
-  function borderColor() {
-    if (!started || timeUp) return "#ccc";
+  function handleRestart() {
+  const shuffled = shuffle(wordsList);
+  setWords(shuffled.slice(0, 70));
+
+  setCurrentIndex(0);
+  setInput("");
+  setScore(0);
+  setTimeUp(false);
+
+  setCountdown(3);
+  setGameStarted(false);
+}
+
+
+  // Background color logic
+  function inputBackground() {
+    if (forceRed) return "#ffcccc";
+
+    if (!input) return "white";
 
     const currentWord = words[currentIndex] || "";
-    if (currentWord.startsWith(input)) {
-      return "green";
+
+    if (input.length > 1) {
+      if (currentWord.startsWith(input)) {
+        return "#c8f7c5"; // green
+      } else {
+        return "#ffcccc"; // red
+      }
     }
-    return "red";
+
+    return "white";
   }
 
-  // Calculate WPM on finish
-  const wpm = Math.round((correctCharCount / 5) / (30 / 60));
-
   return (
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: 40,
-        maxWidth: 400,
-        marginLeft: "auto",
-        marginRight: "auto",
-      }}
-    >
-      <h3 style={{ color: "#1B5E20" }}>
-        {timeUp
-          ? "Time's up!"
-          : words[currentIndex]
-          ? `Type this word :`
-          : "Loading words..."}
-      </h3>
+    <div style={{ textAlign: "center", marginTop: 40 }}>
 
-      {!timeUp && words[currentIndex] && (
-        <div
-          style={{
-            fontSize: "2rem",
-            fontWeight: "700",
-            marginBottom: 20,
-            color: "#2E7D32",
-          }}
-        >
-          {words[currentIndex]}
+      {/* COUNTDOWN */}
+      {!gameStarted && !timeUp && (
+        <div style={{ fontSize: "3rem", fontWeight: 600 }}>
+          {countdown}
         </div>
       )}
 
-      <Timer start={started && !timeUp} duration={30} onTimeUp={handleTimeUp} />
+      {/* GAME */}
+      {gameStarted && !timeUp && (
+        <>
+          <h2>{words[currentIndex]}</h2>
 
-      {!timeUp && words[currentIndex] && (
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={handleChange}
-          placeholder="Type here..."
-          autoComplete="off"
-          spellCheck={false}
-          style={{
-            marginTop: 20,
-            width: "80%",
-            padding: "10px 15px",
-            fontSize: "1.5rem",
-            borderRadius: 8,
-            border: `3px solid ${borderColor()}`,
-            outline: "none",
-            textAlign: "center",
-          }}
-        />
-      )}
 
-      {timeUp && (
-        <div style={{ marginTop: 30 }}>
-          <p style={{ fontSize: "1.5rem", color: "#1B5E20" }}>
-            Your typing test is complete..
-          </p>
-          <p style={{ fontSize: "1.5rem", color: "#1B5E20" }}>
-            Your WPM : <strong>{wpm}</strong>
-          </p>
-          <button
-            onClick={handleRestart}
+
+          <Timer
+            key={gameStarted ? "running" : "stopped"} 
+            isRunning={gameStarted}
+            duration={30}
+            onTimeUp={handleTimeUp}
+          />
+
+
+
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={handleChange}
+            placeholder="Type here..."
+            className={flashWrong ? "wrong-flash wiggle" : ""}
             style={{
-              marginTop: 20,
-              padding: "12px 24px",
-              fontSize: "1rem",
+              padding: "10px",
+              fontSize: "1.5rem",
               borderRadius: "8px",
-              backgroundColor: "#4caf50",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
+              border: "2px solid #1B5E20",
+              backgroundColor: inputBackground(),
+              textAlign: "center"
             }}
-          >
-            Play Again
-          </button>
-        </div>
+          />
+        </>
       )}
+
+      {/* RESULT */}
+      {timeUp && (
+        <>
+          <h2>⏰ Time's up!</h2>
+          <p style={{ fontSize: "1.5rem" }}>
+            🎉 Your Final Score: <strong>{score}</strong> 🏆
+          </p>
+          <button onClick={handleRestart}>
+            🔥 Play Again
+          </button>
+        </>
+      )}
+
     </div>
   );
 }
